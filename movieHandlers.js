@@ -82,9 +82,49 @@ const getUsersByID = (req, res) => {
     });
 };
 
+const postMovies = (req, res) => {
+  console.log(req.body);
+  const { title, director, year, color, duration } = req.body;
+  res.send("Post route is working");
+  database
+    .query(
+      "INSERT INTO movies(title,director,year,color,duration) VALUES(?,?,?,?,?)",
+      [title, director, year, color, duration]
+    )
+    .then(([result]) => {
+      console.log(result);
+      res.location(`/api/movies/${result.insertID}`).sendStatus(201);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error saving the movie");
+    });
+};
+
+const postUsers = (req, res) => {
+  console.log(req.body);
+  const { id, firstname, lastname, email, city, language } = req.body;
+  res.send("can reach now");
+
+  database
+    .query(
+      "INSERT INTO users(id, firstname, lastname, email, city, language) VALUES(?,?,?,?,?,?)",
+      [id, firstname, lastname, email, city, language]
+    )
+    .then(([result]) => {
+      res.location(`/api/users/${result.insertId}`).sendStatus(201);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error saving users ");
+    });
+};
+
 module.exports = {
   getMovies,
   getMovieById,
   getUsers,
   getUsersByID,
+  postMovies,
+  postUsers,
 };
