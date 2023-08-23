@@ -27,14 +27,58 @@
 const database = require("./database");
 
 const getMovies = (req, res) => {
+  let initialSql = "select * from movies";
+  const where = [];
+
+  if (req.query.color != null) {
+    where.push({
+      column: "color",
+      value: req.query.color,
+      operator: "=",
+    });
+  }
+  if (req.query.max_duration != null) {
+    where.push({
+      column: "duration",
+      value: req.query.max_duration,
+      operator: "<=",
+    });
+  }
+  const query = where.reduce((sql, { column, operator }, index) => {
+    return `${sql} ${index === 0 ? "where" : "and"} ${column} ${operator}?`;
+  }, initialSql);
+  const value = where.map(({ value }) => value);
   database
-    .query("select * from movies")
+    .query(query, value)
     .then(([movies]) => {
       res.json(movies);
     })
     .catch((err) => {
+      console.error(err);
       res.status(500).send("Error retrieving data from database");
     });
+  // if (req.query.color != null) {
+  //   sql += "where color=?";
+  //   sqlValue.push(req.query.color);
+  // }
+  // if (req.query.max_duration != null) {
+  //   sql += "WHERE duration<=?";
+  //   sqlValue.push(req.query.max_duration);
+  // }
+
+  // if (req.query.max_duration != null && req.query.color != null) {
+  //   sql += `Where duration<=? AND color=?`;
+  //   sqlValue.push(req.query.max_duration,req.query.);
+  // }
+
+  // database
+  //   .query(sql, sqlValue)
+  //   .then(([movies]) => {
+  //     res.json(movies);
+  //   })
+  //   .catch((err) => {
+  //     res.status(500).send("Error retrieving data from database");
+  //   });
 };
 
 const getMovieById = (req, res) => {
@@ -55,14 +99,47 @@ const getMovieById = (req, res) => {
 };
 
 const getUsers = (req, res) => {
+  let initialSql = "select * from users";
+  const where = [];
+  if (req.query.language != null) {
+    where.push({
+      column: "language",
+      value: req.query.language,
+      operator: "=",
+    });
+  }
+  if (req.query.city != null) {
+    where.push({
+      column: "city",
+      value: req.query.city,
+      operator: "=",
+    });
+  }
+
+  const query = where.reduce((sql, { column, operator }, index) => {
+    return `${sql} ${index === 0 ? "where" : "and"} ${column} ${operator}?`;
+  }, initialSql);
+
+  const values = where.map(({ value }) => value);
+
   database
-    .query("select * from users")
-    .then(([users]) => {
+    .query(query, values)
+    .then((users) => {
       res.json(users);
     })
     .catch((err) => {
-      res.status(500).send("Error retrieving data from database");
+      console.error(err);
+      res.status(500).send("Error retrieving users");
     });
+  // console.log(req.query);
+  // database
+  //   .query("select * from users")
+  //   .then(([users]) => {
+  //     res.json(users);
+  //   })
+  //   .catch((err) => {
+  //     res.status(500).send("Error retrieving data from database");
+  //   });
 };
 
 const getUsersByID = (req, res) => {
